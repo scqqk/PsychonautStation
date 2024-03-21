@@ -13,12 +13,15 @@
 	custom_materials = list(/datum/material/iron = SMALL_MATERIAL_AMOUNT*2)
 	custom_price = PAYCHECK_COMMAND
 
-/obj/item/autopsy_scanner/interact_with_atom(atom/interacting_with, mob/living/user)
+/obj/item/autopsy_scanner/interact_with_atom(atom/interacting_with, mob/living/user, datum/tgui/ui)
 	if(!isliving(interacting_with))
 		return NONE
 	if(!user.can_read(src) || user.is_blind())
 		return ITEM_INTERACT_BLOCKING
-
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "Autospy")
+		ui.open()
 	var/mob/living/M = interacting_with
 
 	if(M.stat != DEAD && !HAS_TRAIT(M, TRAIT_FAKEDEATH)) // good job, you found a loophole
@@ -47,7 +50,6 @@
 /obj/item/autopsy_scanner/proc/scan_cadaver(mob/living/carbon/human/user, mob/living/carbon/scanned)
 	if(scanned.stat != DEAD)
 		return
-
 	var/list/autopsy_information = list()
 	autopsy_information += "[scanned.name] - Species: [scanned.dna.species.name]"
 	autopsy_information += "Time of Death - [scanned.station_timestamp_timeofdeath]"
